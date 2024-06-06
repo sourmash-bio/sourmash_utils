@@ -1,9 +1,12 @@
 "Python utilities for sourmash plugins and scripts."
 import sourmash
+from sourmash import sourmash_args
+from sourmash.cli import utils as sourmash_cli
 
-__all__ = ['FracMinHash']
+__all__ = ['FracMinHash', 'add_standard_minhash_args']
 
 class FracMinHash(sourmash.MinHash):
+    "An updated MinHash class with nicer constructor arguments."
     def __init__(self, *,
                  ksize=31,
                  scaled=1000,
@@ -34,3 +37,21 @@ class FracMinHash(sourmash.MinHash):
                          scaled=scaled,
                          track_abundance=track_abundance,
                          **kwargs)
+
+
+def add_standard_minhash_args(parser):
+    sourmash_cli.add_construct_moltype_args(parser)
+    sourmash_cli.add_ksize_arg(parser, default=31)
+    sourmash_cli.add_scaled_arg(parser, default=1000)
+
+
+def create_minhash_from_args(args, *, track_abundance=False, **defaults):
+    default_moltype = defaults.get('moltype')
+    moltype = sourmash_args.calculate_moltype(args, default=default_moltype)
+    ksize = int(defaults.get('ksize', 31))
+    scaled = int(defaults.get('scaled', 1000))
+
+    return FracMinHash(moltype=moltype,
+                       ksize=ksize,
+                       scaled=scaled,
+                       track_abundance=track_abundance)
