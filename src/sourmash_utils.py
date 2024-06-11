@@ -19,6 +19,16 @@ class FracMinHash(sourmash.MinHash):
         assert 'dayhoff' not in kwargs
         assert 'hp' not in kwargs
 
+        if scaled is None:
+            raise ValueError(f"must specify scaled")
+        else:
+            scaled = int(scaled)
+
+        if ksize is None:
+            raise ValueError(f"must specify ksize")
+        else:
+            ksize = int(ksize)
+
         if moltype == 'DNA':
             kwargs['is_protein'] = False
             kwargs['dayhoff'] = False
@@ -38,6 +48,9 @@ class FracMinHash(sourmash.MinHash):
                          track_abundance=track_abundance,
                          **kwargs)
 
+    def __str__(self):
+        return f"k={self.ksize} scaled={self.scaled} moltype={self.moltype}"
+
 
 def add_standard_minhash_args(parser):
     sourmash_cli.add_construct_moltype_args(parser)
@@ -48,8 +61,8 @@ def add_standard_minhash_args(parser):
 def create_minhash_from_args(args, *, track_abundance=False, **defaults):
     default_moltype = defaults.get('moltype')
     moltype = sourmash_args.calculate_moltype(args, default=default_moltype)
-    ksize = args.ksize or int(defaults.get('ksize', 31))
-    scaled = int(args.scaled) or int(defaults.get('scaled', 1000))
+    ksize = args.ksize or defaults.get('ksize', 31)
+    scaled = args.scaled or defaults.get('scaled', 1000)
 
     return FracMinHash(moltype=moltype,
                        ksize=ksize,
