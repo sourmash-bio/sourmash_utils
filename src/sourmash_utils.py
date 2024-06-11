@@ -48,10 +48,24 @@ def add_standard_minhash_args(parser):
 def create_minhash_from_args(args, *, track_abundance=False, **defaults):
     default_moltype = defaults.get('moltype')
     moltype = sourmash_args.calculate_moltype(args, default=default_moltype)
-    ksize = int(defaults.get('ksize', 31))
-    scaled = int(defaults.get('scaled', 1000))
+    ksize = args.ksize or int(defaults.get('ksize', 31))
+    scaled = int(args.scaled) or int(defaults.get('scaled', 1000))
 
     return FracMinHash(moltype=moltype,
                        ksize=ksize,
                        scaled=scaled,
                        track_abundance=track_abundance)
+
+
+def load_index_and_select(filename, minhash_obj, *, raise_on_empty=True):
+    """Load a sourmash Index object from filename, select sketches compatible
+    with minhash_obj.
+    """
+    idx = sourmash.load_file_as_index(filename)
+    idx = idx.select(ksize=minhash_obj.ksize,
+                     moltype=minhash_obj.moltype,
+                     scaled=minhash_obj.scaled,
+                     abund=minhash_obj.track_abundance)
+    if not idx:
+        raise ValueError(f"no matching sketches in '{filename}' for k={minhash_obj.ksize} moltype={minhash_obj.moltype} scaled={minhash_obj.scaled}")
+    return idx
