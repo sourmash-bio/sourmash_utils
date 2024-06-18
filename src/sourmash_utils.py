@@ -3,7 +3,15 @@ import sourmash
 from sourmash import sourmash_args
 from sourmash.cli import utils as sourmash_cli
 
-__all__ = ['FracMinHash', 'add_standard_minhash_args']
+from enum import Enum
+
+__all__ = ['FracMinHash',
+           'add_standard_minhash_args',
+           'LoadSketchesFromArgparse',
+           'LOAD_KSIZE',
+           'LOAD_MOLTYPE',
+           'LOAD_MINHASH_TYPE']
+           
 
 class FracMinHash(sourmash.MinHash):
     "An updated MinHash class with nicer constructor arguments."
@@ -82,3 +90,55 @@ def load_index_and_select(filename, minhash_obj, *, raise_on_empty=True):
     if not idx:
         raise ValueError(f"no matching sketches in '{filename}' for k={minhash_obj.ksize} moltype={minhash_obj.moltype} scaled={minhash_obj.scaled}")
     return idx
+
+
+###
+
+
+class LOAD_KSIZE(Enum):
+    ANY = 1
+    ALL = 2
+    REQUIRE = 3
+
+class LOAD_MOLTYPE(Enum):
+    ANY = 1
+    ALL = 2
+    REQUIRE = 3
+    DNA_ONLY = 4
+    PROT_ONLY = 5
+
+class LOAD_MINHASH_TYPE(Enum):
+    ANY = 1
+    ALL = 2
+    SCALED_ONLY = 3
+    NUM_ONLY = 4
+
+
+class LoadSketchesFromArgparse:
+    """
+    * support custom list of files
+    * do NOT support from-file by default, but do support as option.
+    * support picklists.
+    * streaming load
+    * require manifests => determine ksize/moltype/scaled matching.
+
+    Q:
+    * context manager/streaming save in addition? or separate?
+    * support num?
+    """
+    def __init__(self, *,
+                 ksize_spec=LOAD_KSIZE.ANY,
+                 moltype_spec=LOAD_MOLTYPE.ANY,
+                 minhash_spec=LOAD_MINHASH_TYPE.SCALED_ONLY):
+        pass
+
+    def load_many(self, args, *, filelist=None, from_file=None,
+                  support_picklists=True):
+        
+        for sketchfile in filelist:
+            idx = sourmash.load_file_as_index(sketchfile)
+            for ss in idx.signatures():
+                yield ss
+
+    def load_one(self, args, *, target=None):
+        pass
