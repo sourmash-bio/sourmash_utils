@@ -2,10 +2,10 @@
 name = "sourmash_utils"
 description = "Python utilities for sourmash plugins and scripts"
 readme = "README.md"
-requires-python = ">=3.10"
-version = "0.2"
+requires-python = ">=3.11"
+version = "0.3"
 
-dependencies = ["sourmash>=4.8.9,<5"]
+dependencies = ["sourmash>=4.9.0,<5"]
 
 [metadata]
 license = { text = "BSD 3-Clause License" }

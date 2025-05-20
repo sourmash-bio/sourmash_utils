@@ -1,4 +1,9 @@
+"""
+tests for sourmash_utils
+"""
+
 from sourmash_utils import *
+import tst_utils as utils
 
 
 def test_basic():
@@ -43,3 +48,28 @@ def test_minhash_create_hp():
     assert mh.moltype == 'hp'
     assert mh.scaled == 100
     assert mh.ksize == 7
+
+
+def test_minhash_create_skipm1n3():
+    # test moltype skipm1n3
+    mh = FracMinHash(ksize=21, scaled=1000, moltype='skipm1n3')
+    assert mh.moltype == 'skipm1n3'
+    assert mh.scaled == 1000
+    assert mh.ksize == 21
+
+
+def test_minhash_create_skipm2n3():
+    # test moltype skipm1n3
+    mh = FracMinHash(ksize=21, scaled=1000, moltype='skipm2n3')
+    assert mh.moltype == 'skipm2n3'
+    assert mh.scaled == 1000
+    assert mh.ksize == 21
+
+
+def test_load_sketches_argparse_1():
+    zipfile = utils.get_test_data('multiple-sketches.sig.zip')
+
+    loader = LoadSketchesFromArgparse(ksize_spec=LOAD_KSIZE.ALL)
+
+    x = list(loader.load_many(None, filelist=[zipfile]))
+    assert len(x) == 8
